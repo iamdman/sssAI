@@ -1,14 +1,31 @@
 {
-    "1":
+    "3": 
         {
-        "name":"Back Yard",
+        "name":"Front Yard Cam",
         "threshold": 50,
-        "triggerUrl": "URL from Action Rule to trigger the camera goes here"
+        "triggerUrl": "URL from Action Rule to trigger the camera goes here",
+    "detect_types": ["person", "car"],
+    "min_sizex": 100, 
+    "min_sizey": 100    
         },
-    "2":
-        {
-        "name": "Front Door",
+    "4": 
+    {
+        "name":"Driveway Cam",
         "threshold": 50,
-        "triggerUrl": "URL from Action Rule to trigger the camera goes here"
-        }
+        "triggerUrl": "URL from Action Rule to trigger the camera goes here",
+    "detect_types": 
+     {"person" :
+       {
+        "min_sizex": 100, 
+        "min_sizey": 100,
+        "ignore_polygons" : [[[1,1],[2,2],[3,3]],[[1,1],[2,2]]]
+       },
+       "car" :
+       {
+        "min_sizex": 100, 
+        "min_sizey": 100,
+        "ignore_polygons" : [[[1,1],[2,2],[3,3],[4,4]],[[1,1],[2,2]]]
+       }
+     }  
+    }
 }
