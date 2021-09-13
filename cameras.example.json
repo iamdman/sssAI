@@ -9,12 +9,14 @@
                {
                 "min_sizex": 200, 
                 "min_sizey": 200,
+            	"min_confidence": 60,                   
                 "ignore_polygons" : [[[0,0],[2,2],[3,3]],[[1,1],[2,2]]]
                },
                "person" :
                {
                 "min_sizex": 100, 
                 "min_sizey": 100,
+            	"min_confidence": 60,                   
                 "ignore_polygons" : [[[1,1],[2,2],[3,3],[4,4]],[[1,1],[2,2]]]
                }
              }  
@@ -29,12 +31,14 @@
                {
                 "min_sizex": 100, 
                 "min_sizey": 100,
+            	"min_confidence": 60,                   
                 "ignore_polygons" : [[[1,1],[2,2],[3,3]],[[1,1],[2,2]]]
                },
                "car" :
                {
                 "min_sizex": 100, 
                 "min_sizey": 100,
+            	"min_confidence": 60,                   
                 "ignore_polygons" : [[[1,1],[2,2],[3,3],[4,4]],[[1,1],[2,2]]]
                }
              }  
