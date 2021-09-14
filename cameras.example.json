@@ -4,43 +4,69 @@
             "name":"Front Yard Cam",
             "threshold": 50,
             "triggerUrl": "URL from Action Rule to trigger the camera goes here",
-            "detect_types": 
-             {"car" :
-               {
-                "min_sizex": 200, 
-                "min_sizey": 200,
-            	"min_confidence": 60,                   
-                "ignore_polygons" : [[[0,0],[2,2],[3,3]],[[1,1],[2,2]]]
-               },
-               "person" :
-               {
+            "detect_objects": 
+               [
+                {
+                "type": "car",
                 "min_sizex": 100, 
                 "min_sizey": 100,
-            	"min_confidence": 60,                   
-                "ignore_polygons" : [[[1,1],[2,2],[3,3],[4,4]],[[1,1],[2,2]]]
-               }
-             }  
+                "min_confidence": 60,                   
+    			"ignore_areas": [
+    					{
+    						"y_min": 110,
+    						"x_min": 0,
+    						"y_max": 440,
+    						"x_max": 110
+    					}
+                        ,
+    					{
+    						"y_min": 221,
+    						"x_min": 211,
+    						"y_max": 720,
+    						"x_max": 799
+    					}
+    				],
+                "ignore_polygons" : [[[1100,1120],[1110,1210],[1220,1110],[2220,2310]]]
+                },
+                {
+                "type": "person",
+                "min_sizex": 100, 
+                "min_sizey": 100,
+                "min_confidence": 60,                   
+                "ignore_polygons" : [[[644,855],[1113,1122],[2122,2112]]]
+                 }
+               ]
         },
     "4": 
         {
             "name":"Driveway Cam",
             "threshold": 50,
             "triggerUrl": "URL from Action Rule to trigger the camera goes here",
-            "detect_types": 
-             {"person" :
-               {
-                "min_sizex": 100, 
-                "min_sizey": 100,
-            	"min_confidence": 60,                   
-                "ignore_polygons" : [[[1,1],[2,2],[3,3]],[[1,1],[2,2]]]
-               },
-               "car" :
-               {
-                "min_sizex": 100, 
-                "min_sizey": 100,
-            	"min_confidence": 60,                   
-                "ignore_polygons" : [[[1,1],[2,2],[3,3],[4,4]],[[1,1],[2,2]]]
-               }
-             }  
+            "detect_objects": 
+               [
+                 {
+                "type": "car",
+                "min_sizex": 50, 
+                "min_sizey": 50,
+                "min_confidence": 60,
+    			"ignore_areas": [
+    					{
+    						"y_min": 100,
+    						"x_min": 100,
+    						"y_max": 120,
+    						"x_max": 120
+    					}
+    				],                
+                "ignore_polygons" : [[[111,111],[112,112],[113,113]],[[111,111],[112,211],[161,116]]]
+                 },
+                 {
+                "type": "person",
+                "min_sizex": 50, 
+                "min_sizey": 50,
+                "min_confidence": 60,                   
+                "ignore_polygons" : [[[211,122],[222,222],[322,312],[421,422]],[[111,111],[211,211],[117,117]]]
+                 }
+               ]
         }
 }
+
