@@ -1,9 +1,12 @@
 {
-    "sssUrl":"http://SYNOLOGY_ADDRESS:5000",
-    "deepstackUrl": "http://deepstack:5000",
-    "username": "username",
-    "password": "passowrd",
-    "triggerInterval": 60,
-    "captureDir": "/captureDir",
-    "homebridgeWebhookUrl": null
+	"sssUrl": "http://192.168.178.10:5000",
+	"deepstackUrl": "http://192.168.178.10:83",
+	"username": "username",
+	"password": "passowrd",
+	"triggerInterval": 15,
+	"timeout": 180,
+	"captureDir": "/captureDir",
+	"SSSGetSessionURL" : "{}/webapi/auth.cgi?api=SYNO.API.Auth&method=login&version=3&account={}&passwd={}&session=SurveillanceStation",
+	"SSSGetSnapshotURL" : "{}/webapi/entry.cgi?camStm=1&version=2&cameraId={}&api=%22SYNO.SurveillanceStation.Camera%22&method=GetSnapshot",
+	"homebridgeWebhookUrl": null
 }
