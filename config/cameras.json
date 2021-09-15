@@ -1,20 +1,71 @@
 {
-	"1": 
-			{
-			"name":"Back Yard",
-			"triggerUrl": "URL from Action Rule to trigger the camera goes here",
-			"ignore_areas": [
-				{
-					"y_min": 692,
-					"x_min": 3,
-					"y_max": 1294,
-					"x_max": 318
-				}
-			]
-			},
-	"2":
-			{
-			"name": "Front Door",
-			"triggerUrl": "URL from Action Rule to trigger the camera goes here"
-			}
+    "3": 
+        {
+            "name":"Front Yard Cam",
+            "threshold": 50,
+            "triggerUrl": "URL from Action Rule to trigger the camera goes here",
+            "detect_objects": 
+               [
+                {
+                "type": "car",
+                "min_sizex": 1, 
+                "min_sizey": 1,
+                "min_confidence": 60,                   
+    			"ignore_areas": [
+    					{
+    						"y_min": 0,
+    						"x_min": 0,
+    						"y_max": 20,
+    						"x_max": 20
+    					}
+                        ,
+    					{
+    						"y_min": 1,
+    						"x_min": 1,
+    						"y_max": 20,
+    						"x_max": 99
+    					}
+    				],
+                "ignore_polygons" : [[[0,0],[10,0],[10,10],[0,10]]]
+                },
+                {
+                "type": "person",
+                "min_sizex": 1, 
+                "min_sizey": 1,
+                "min_confidence": 60,                   
+                "ignore_polygons" : [[[1,8],[3,8],[2,8]]]
+                 }
+               ]
+        },
+    "45": 
+        {
+            "name":"Driveway Cam",
+            "threshold": 50,
+            "triggerUrl": "URL from Action Rule to trigger the camera goes here",
+            "detect_objects": 
+               [
+                 {
+                "type": "car",
+                "min_sizex": 1, 
+                "min_sizey": 1,
+                "min_confidence": 60,
+    			"ignore_areas": [
+    					{
+    						"y_min": 0,
+    						"x_min": 0,
+    						"y_max": 20,
+    						"x_max": 20
+    					}
+    				],                
+                "ignore_polygons" : [[[11,1],[2,2],[3,3]],[[1,1],[2,2],[6,6]]]
+                 },
+                 {
+                "type": "person",
+                "min_sizex": 1, 
+                "min_sizey": 1,
+                "min_confidence": 60,                   
+                "ignore_polygons" : [[[21,1],[2,2],[3,3],[4,4]],[[1,1],[2,2],[7,7]]]
+                 }
+               ]
+        }
 }
