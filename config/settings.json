@@ -3,14 +3,10 @@
 	"deepstackUrl": "http://192.168.178.10:83",
 	"username": "username",
 	"password": "passowrd",
-	"detect_labels": [
-		"person"
-	],
-	"min_sizex": 100,
-	"min_sizey": 100,
 	"triggerInterval": 15,
 	"timeout": 180,
-	"min_confidence": 60,
 	"captureDir": "/captureDir",
+	"SSSGetSessionURL" : "{}/webapi/auth.cgi?api=SYNO.API.Auth&method=login&version=3&account={}&passwd={}&session=SurveillanceStation",
+	"SSSGetSnapshotURL" : "{}/webapi/entry.cgi?camStm=1&version=2&cameraId={}&api=%22SYNO.SurveillanceStation.Camera%22&method=GetSnapshot",
 	"homebridgeWebhookUrl": null
 }
