@@ -2,7 +2,7 @@
 	"sssUrl": "http://192.168.178.10:5000",
 	"deepstackUrl": "http://192.168.178.10:83",
 	"username": "username",
-	"password": "password",
+	"password": "passowrd",
 	"triggerInterval": 15,
 	"timeout": 180,
 	"captureDir": "/captureDir",

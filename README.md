@@ -7,6 +7,14 @@ Features:
 * HomeKit integration (via HomeBridge and Homebridge Webhooks & Camera-ffmpeg plugins)
 * Captured image with border-box annotations saved for review
 
+Builds upon work by Christopher Adams (Christofo - original design), CoooWeee (CoooWeee - Ignore Areas feature), and Thiago Figueiró (thiagofigueiro - Docker Compose support)
+New Features I will be looking into:
+* detect_labels moved out of settings.json.  detect_objects replaces detect_labels and is now per camera.
+* Adding feature "ignore_polygons". This builds upon ignore area which lets you ignore an rectangular section of your camera image; additionally we will be able to ignore a polygon. "ignore_polygons" will be per camera per detect label 
+* Also changes to allow min size for each type of detect type.  Each detect type (e.g person, car, etc.) will have its own set of polygons to ignore and these values can be different per cam.  Same goes for ignore_areas.
+* Windows or web app tool to be built in future to allow user to grab snapshot from SSS draw ignore polygons and export JSON for your config (TBD).
+* Push notifications by calling docker push container directly from Python
+* Storing video clip in cloud (likely google) which can be viewed directly from push notification
 
 ## Performance 
 * DS920+ (20GB RAM) - Deepstack set to "low" - ~2 seconds for image recognition 
