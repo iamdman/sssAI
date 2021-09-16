@@ -10,34 +10,36 @@
                 "type": "car",
                 "min_sizex": 1, 
                 "min_sizey": 1,
-                "min_confidence": 60,                   
+                "min_confidence": 55,                   
     			"ignore_areas": [
     					{
-    						"y_min": 0,
-    						"x_min": 0,
-    						"y_max": 20,
-    						"x_max": 20
+    						"y_min": 220,
+    						"x_min": 220,
+    						"y_max": 202,
+    						"x_max": 202
     					}
                         ,
     					{
-    						"y_min": 1,
-    						"x_min": 1,
-    						"y_max": 20,
-    						"x_max": 99
+    						"y_min": 220,
+    						"x_min": 220,
+    						"y_max": 220,
+    						"x_max": 220
     					}
     				],
-                "ignore_polygons" : [[[0,0],[10,0],[10,10],[0,10]]]
+                "comment": "ignore cars in our driveway",
+                "ignore_polygons" : [[[638,343],[1372,705],[1486.609],[1719,726],[1891,425],[1050,240]]]
                 },
                 {
                 "type": "person",
-                "min_sizex": 1, 
-                "min_sizey": 1,
+                "min_sizex": 80, 
+                "min_sizey": 80,
                 "min_confidence": 60,                   
-                "ignore_polygons" : [[[1,8],[3,8],[2,8]]]
+                "comment": "ignore people on sidewalk",
+                "ignore_polygons" : [[[271,786],[1766,199],[1730,185],[814,428],[221,663]]]
                  }
                ]
         },
-    "45": 
+    "4": 
         {
             "name":"Driveway Cam",
             "threshold": 50,
@@ -48,23 +50,17 @@
                 "type": "car",
                 "min_sizex": 1, 
                 "min_sizey": 1,
-                "min_confidence": 60,
-    			"ignore_areas": [
-    					{
-    						"y_min": 0,
-    						"x_min": 0,
-    						"y_max": 20,
-    						"x_max": 20
-    					}
-    				],                
-                "ignore_polygons" : [[[11,1],[2,2],[3,3]],[[1,1],[2,2],[6,6]]]
+                "min_confidence": 55,
+                "comment": "ignore cars in our driveway",
+                "ignore_polygons" : [[[692,293],[1196,311],[1470,995],[373,961]]]
                  },
                  {
                 "type": "person",
-                "min_sizex": 1, 
-                "min_sizey": 1,
+                "min_sizex": 80, 
+                "min_sizey": 80,
                 "min_confidence": 60,                   
-                "ignore_polygons" : [[[21,1],[2,2],[3,3],[4,4]],[[1,1],[2,2],[7,7]]]
+                "comment": "ignore people on sidewalk",
+                "ignore_polygons" : [[[68,425],[1918,520],[1918,621],[896,577],[23,521]]]
                  }
                ]
         }
