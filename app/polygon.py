@@ -3,7 +3,7 @@
 # Refer https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 # for explanation of functions onSegment(),
 # orientation() and doIntersect() 
-# This code is contributed by Vikas Chitturi, thank-you!
+# This code is contributed by Vikas Chitturi
 
 import logging
 
@@ -30,7 +30,6 @@ def onSegment(p:tuple, q:tuple, r:tuple) -> bool:
 # 1 --> Clockwise
 # 2 --> Counterclockwise
 def orientation(p:tuple, q:tuple, r:tuple) -> int:
-     
     val = (((q[1] - p[1]) *
             (r[0] - q[0])) -
            ((q[0] - p[0]) *
@@ -78,14 +77,6 @@ def doIntersect(p1, q1, p2, q2):
         return True
  
     return False
-
-def IsInsidePolygons(points:list, p:tuple, label) -> bool:
-    for polygon in points:
-        if not IsInsidePolygon(polygon, p, label):
-            Log("INFO","'{}' with center @ {} is not within ignore polygon {}. Triggering...".format(label,p,polygon))
-            return False
-        Log("DEBUG","'{}' with center @ {} is within ignore polygon {}. Not triggering.".format(label,p,polygon))
-    return True
     
 # Returns true if the point p lies 
 # inside the polygon[] with n vertices
@@ -132,10 +123,10 @@ def IsInsidePolygon(points:list, p:tuple, label) -> bool:
     return (count % 2 == 1)
 
 def Log(level, entry):
+    print(entry)
     if level == "DEBUG":
         logging.debug(entry)
     elif level == "ERROR":
         logging.error(entry)
     else:
         logging.info(entry)
-        print(entry)
