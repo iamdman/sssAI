@@ -248,18 +248,19 @@ async def read_item(camera_id, debug: Optional[str] = None):
 
     end = time.time()
     runtime = round(end - start, 1)
+    start = time.time()
+    fn = "{}/{}-{}.jpg".format(capture_dir,cameraname,start)
     
     #test assistance, force found
     if str(debug) == "99":
         founditems = ['Test Request']
         found=True
+        fn = "{}/{}-{}.jpg".format(capture_dir,"TestOnly",start)
         Log("INFO","Debug Mode On = {} - This trigger was manually invoked".format(debug))
 
     if found:	
         try:
            founditems = ' '.join(map(str, founditems))
-           start = time.time()
-           fn = "{}/{}-{}.jpg".format(capture_dir,cameraname,start)
            send_email(cameraname, founditems, snapshot_file, fn)
            ignore_polygons_list = [item.get("ignore_polygons") for item in list(cameradata[camera_id]["detect_objects"])]
            save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list, fn)
