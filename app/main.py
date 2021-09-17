@@ -7,8 +7,10 @@ import base64
 import time
 import json
 import pickle
+import sys
 import os
 from polygon import *
+from sendmail import *
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 Log("INFO",'App Started')
@@ -73,29 +75,66 @@ def load_last_trigger():
         return {}
         
 def Log(level, entry):
+    print(entry)        
     if level == "DEBUG":
-        logging.debug(entry)
+        logging.info(entry)
     elif level == "ERROR":
-        logging.error(entry)
+        logging.info(entry)
     else:
         logging.info(entry)
-        print(entry)        
-
+        
 def contains(rOutside, rInside):
     return rOutside["x_min"] < rInside["x_min"] < rInside["x_max"] < rOutside["x_max"] and \
         rOutside["y_min"] < rInside["y_min"] < rInside["y_max"] < rOutside["y_max"]
 
+def IsInsidePolygons(points:list, p:tuple, label, confidence) -> bool:
+    i = 0
+    count = len(points)
+    if count == 0: 
+        return True
+    else:
+        Log("DEBUG","We have at least {} ignore polygon(s) to check, if {} is not in any of these zones then trigger will be initiated.".format(len(points),label))
+        hit = []
+        for polygon in points:
+            i=i+1
+            Log("DEBUG","{}. Checking polygon {}...".format(i,polygon))
+            if not IsInsidePolygon(polygon, p, label):
+                hit = polygon
+            else:
+                Log("DEBUG","'{}' ({}%) with center @ {} is within ignore polygon {}".format(label,confidence,p,polygon))
+                return True
+        Log("DEBUG","'{}' ({}%) with center @ {} is not within ignore polygon {}".format(label,confidence,p,polygon))
+        return False
+        
 # If you would like to ignore objects outside the ignore area instead of inside, set this to contains(rect, ignore_area):
-def IsInsideArea(rect, ignore_areas, label):
-    for ignore_area in ignore_areas:
-        if not contains(ignore_area, rect):
-            Log("INFO","'{}' matching {} is NOT within ignore area {}. Triggering...".format(label,rect,ignore_area))
-            return False
-        Log("DEBUG","'{}' matching {} is within ignore area {}. Not triggering.".format(label,rect,ignore_area))
-    return True
+def IsInsideAreas(rect, ignore_areas, label, confidence):
+    i = 0
+    count = len(ignore_areas)
+    if count == 0: 
+        return True
+    else:
+        hit = []
+        Log("DEBUG","We have at least {} ignore areas(s) to check, if {} is not in any of these zones then trigger will be initiated.".format(count,label))
+        for ignore_area in ignore_areas:
+            i+=1
+            Log("DEBUG","{}. Checking area {}...".format(i,ignore_area))
+            if not contains(ignore_area, rect):
+                hit = ignore_area
+            else:
+                Log("DEBUG","'{}' ({}%) matching {} is within ignore area {}".format(label,confidence,rect,ignore_area))
+                return True
+        Log("DEBUG","'{}' ({}%) matching {} is NOT within ignore area {}".format(label,confidence,rect,ignore_area))
+        return False
 
-@app.get("/{camera_id}")
-async def read_item(camera_id):
+def CheckZones(prediction, ignore_areas, label, confidence, points, p)-> bool:
+    if not IsInsideAreas(prediction, ignore_areas, label, confidence):
+        return True
+    elif not IsInsidePolygons(points = points, p = p, label = label, confidence = confidence):
+        return True
+    return False
+    
+@app.get("/{camera_id}/{debug}")
+async def read_item(camera_id, debug):
     start = time.time()
     cameraname = cameradata["{}".format(camera_id)]["name"]
     predictions = None
@@ -120,11 +159,11 @@ async def read_item(camera_id):
         homekit_acc_id = cameradata["{}".format(camera_id)]["homekitAccId"]
 
     response = requests.request("GET", url, cookies=load_cookies("cookie"))
-    logging.debug('Requested snapshot: ' + url)
+    Log("DEBUG",'Requested snapshot: ' + url)
     if response.status_code == 200:
         with open("/tmp/{}.jpg".format(camera_id), "wb") as f:
             f.write(response.content)
-            logging.debug("Snapshot downloaded")
+            Log("DEBUG","Snapshot downloaded")
 
     snapshot_file = "/tmp/{}.jpg".format(camera_id)
     image_data = open(snapshot_file, "rb").read()
@@ -146,7 +185,8 @@ async def read_item(camera_id):
 
     i = 0
     found = False
-
+    founditems = []
+	
     for prediction in response["predictions"]:
         if found: break
         i += 1
@@ -180,12 +220,11 @@ async def read_item(camera_id):
                    sizey > min_sizey and \
                    confidence > min_confidence:
 
-                    Log("DEBUG","Minimum size and confidence passed. Checking if {} object is in ignore zone.".format(label))
-                    if not IsInsideArea(prediction, ignore_areas, label):
-                        found = True
-                    elif not IsInsidePolygons(points = detect_object["ignore_polygons"], p = p, label = label):
-                        found = True
-                    if found:                                
+                    Log("DEBUG","Minimum size and confidence haved passed for {} id={}...".format(label,i))
+                    found = CheckZones(prediction, ignore_areas, label, confidence, detect_object["ignore_polygons"], p)
+
+                    if found:
+                        founditems.append(label)
                         payload = {}
                         response = requests.request("GET", triggerurl, data=payload)
                         end = time.time()
@@ -193,54 +232,97 @@ async def read_item(camera_id):
                         Log("INFO","{}% sure we found a {} - triggering {} - took {} seconds".format(confidence,label,cameraname,runtime))
                         last_trigger[camera_id] = time.time()
                         save_last_trigger(last_trigger)
-                        logging.debug("Saving last camera time for {} as {}".format(camera_id,last_trigger[camera_id]))
+                        Log("DEBUG","Saving last camera time for {} as {}".format(camera_id,last_trigger[camera_id]))
                         if homebridgeWebhookUrl is not None and homekit_acc_id is not None:
                             hb = requests.get("{}/?accessoryId={}&state=true".format(homebridgeWebhookUrl,homekitAccId))
-                            logging.debug("Sent message to homebridge webhook: {}".format(hb.status_code))
+                            Log("DEBUG","Sent message to homebridge webhook: {}".format(hb.status_code))
                         else:
-                            logging.debug("Skipping HomeBridge Webhook since no webhookUrl or accessory Id")
+                            Log("DEBUG","Skipping HomeBridge Webhook since no webhookUrl or accessory Id")
+                    else:
+                        Log("DEBUG","Ignoring '{}' id={} as it was in an ignore zone.".format(label,i))
+                            
                 else:
-                    Log("DEBUG","Ignoring '{}' as it did not meet minimum size or confidence setting.".format(label))
+                    Log("DEBUG","Ignoring '{}' id={} as it did not meet minimum size or confidence setting.".format(label,i))
 
     end = time.time()
     runtime = round(end - start, 1)
-    if found:
-        ignore_polygons_list = [item.get("ignore_polygons") for item in list(cameradata[camera_id]["detect_objects"])]
-        save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list)
-        return ("Triggering camera because something was found - took {} seconds").format(runtime)
+    
+    #test assistance, force found
+    if str(debug) == "99":
+        founditems = ['Test Request']
+        found=True
+        Log("INFO","Debug Mode On = {} - This trigger was manually invoked".format(debug))
+
+    if found:	
+        try:
+           founditems = ' '.join(map(str, founditems))
+           start = time.time()
+           fn = "{}/{}-{}.jpg".format(capture_dir,cameraname,start)
+           send_email(cameraname, founditems, snapshot_file, fn)
+           ignore_polygons_list = [item.get("ignore_polygons") for item in list(cameradata[camera_id]["detect_objects"])]
+           save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list, fn)
+           print(founditems)
+           return ("Triggering camera because {} was found - took {} seconds".format(founditems,runtime))
+        except Exception as e:
+           Log("ERROR","Error: {}".format(e))
+           return (e)
     else:
         Log("INFO","{} not triggered - nothing found - took {} seconds".format(cameraname,runtime))
         return ("{} not triggered - nothing found".format(cameraname))
 
 
-def save_image(predictions, camera_name, snapshot_file, ignore_areas, ignore_polygons_list):
-    start = time.time()
-    logging.debug("Saving new image file....")
-    im = Image.open(snapshot_file)
-    draw = ImageDraw.Draw(im)
+def save_image(predictions, camera_name, snapshot_file, ignore_areas, ignore_polygons_list, fn):
+    try:	
+       start = time.time()
+       im = Image.open(snapshot_file)
+       draw = ImageDraw.Draw(im, "RGBA")
+       tint_color = (0, 0, 0)  # Black
+       transparency = .25  # Degree of transparency, 0-100%
+       opacity = int(255 * transparency)
+   
+       for ignore_area in ignore_areas:
+           draw.rectangle((ignore_area["x_min"], ignore_area["y_min"],
+                           ignore_area["x_max"], ignore_area["y_max"]), outline=(255, 66, 66), fill=(255, 66, 66, 127))
+           draw.text((ignore_area["x_min"]+10, ignore_area["y_min"]+10), "ignore area", fill=(255, 66, 66, 255))
 
-    for object in predictions:
-        confidence = round(100 * object["confidence"])
-        label = "{} ({%)".format(object['label'],confidence)
-        draw.rectangle((object["x_min"], object["y_min"], object["x_max"],
-                        object["y_max"]), outline=(255, 230, 66), width=2)
-        draw.text((object["x_min"]+10, object["y_min"]+10),
-                  label, fill=(255, 230, 66))
+       for ignore_polygons in ignore_polygons_list:
+           for ignore_polygon in ignore_polygons:
+               poly_tuple = list(map(tuple,ignore_polygon))
+               draw.polygon(poly_tuple, fill=(255, 66, 66, 127), outline=(255, 66, 66))
+               draw.text([(ignore_polygon[0][0]+10, ignore_polygon[0][1]+10)], "ignore polygon", fill=(255, 255, 255, 255))
 
-    for ignore_area in ignore_areas:
-        draw.rectangle((ignore_area["x_min"], ignore_area["y_min"],
-                        ignore_area["x_max"], ignore_area["y_max"]), outline=(255, 66, 66), width=2)
-        draw.text((ignore_area["x_min"]+10, ignore_area["y_min"]+10), "ignore area", fill=(255, 66, 66))
+       for object in predictions:
+           confidence = round(100 * object["confidence"])
+           label = "{} ({}%)".format(object['label'], confidence)
+           draw.rectangle((object["x_min"], object["y_min"], object["x_max"], object["y_max"]), outline=(255, 230, 66), width=2)
+           draw.text((object["x_min"]+10, object["y_min"]+10), label, fill=(255, 230, 66, 255))   
 
-    for ignore_polygons in ignore_polygons_list:
-        for ignore_polygon in ignore_polygons:
-            print("new poly")
-            draw.polygon(ignore_polygon, fill=(255, 66, 66), outline=(255, 66, 66))
-            draw.text((ignore_polygon[0][0], ignore_polygon[0][1]), "ignore polygon", fill=(255, 66, 66))
+       im.save(fn, quality=100)
+       im.close()
+       end = time.time()
+       runtime = round(end - start, 1)
+       Log("DEBUG","Saved captured and annotated image: {} in {} seconds.".format(fn,runtime))
+    except Exception as e:
+       Log("ERROR","Error: {}".format(e))
+       
+    
+def send_email(camera_name, founditems, filename, captured_image):
+	# Add body to email
+	subject = "Alert: A {} was found on {}".format(founditems, camera_name)
 
-    fn = "{}/{}-{}.jpg".format(capture_dir,camera_name,start)
-    im.save(fn, quality=100)
-    im.close()
-    end = time.time()
-    runtime = round(end - start, 1)
-    logging.debug("Saved captured and annotated image: {} in {} seconds.".format(fn,runtime))
+	html = """\
+	<html>
+	  <body>
+	    <p><div><div><b>Please check your DS CAM app for the corresponding 
+	    video.</b><br></div><div><b><br></b></div><div><b>Photo is attached.</b>
+	    <br/><br/><b>Log into the server to see the analyzed image here: {}</b>
+		</div><div><br></div></div>
+	    </p>
+	  </body>
+	</html>
+	""".format(captured_image)
+
+	try:	
+		sendmail("ds220plus72@gmail.com", "dtowns@gmail.com", subject, html, filename)
+	except Exception as e:
+		Log("ERROR","Error: {}".format(e))
