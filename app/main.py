@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import FastAPI
 from PIL import Image, ImageDraw
 
@@ -133,8 +134,9 @@ def CheckZones(prediction, ignore_areas, label, confidence, points, p)-> bool:
         return True
     return False
     
-@app.get("/{camera_id}/{debug}")
-async def read_item(camera_id, debug):
+@app.get("/{camera_id}")
+async def read_item(camera_id, debug: Optional[str] = None):
+    Log("INFO","Debug =  {}".format(debug))
     start = time.time()
     cameraname = cameradata["{}".format(camera_id)]["name"]
     predictions = None
