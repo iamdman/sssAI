@@ -40,6 +40,12 @@ if "SSSGetSessionURL" in settings:
 trigger_interval = 60
 if "triggerInterval" in settings:
     trigger_interval = settings["triggerInterval"]
+    
+# if set to .5 the center of a detected deepstack object will be used to determine if the object is withing a polygon
+# if set to a decimal number between such as .05 then 5% from the bottom of the detected object will be used instead
+polygon_deepstack_bottom_offset = 0.5
+if "polygon_deepstack_bottom_offset" in settings:
+    polygon_deepstack_bottom_offset = settings["polygon_deepstack_bottom_offset"]    
 
 capture_dir = "/captureDir"
 if "captureDir" in settings:
@@ -76,11 +82,10 @@ def load_last_trigger():
         return {}
         
 def Log(level, entry):
-    print(entry)        
     if level == "DEBUG":
-        logging.info(entry)
+        logging.debug(entry)
     elif level == "ERROR":
-        logging.info(entry)
+        logging.error(entry)
     else:
         logging.info(entry)
         
@@ -136,9 +141,9 @@ def CheckZones(prediction, ignore_areas, label, confidence, points, p)-> bool:
     
 @app.get("/{camera_id}")
 async def read_item(camera_id, debug: Optional[str] = None):
-    Log("INFO","Debug =  {}".format(debug))
     start = time.time()
     cameraname = cameradata["{}".format(camera_id)]["name"]
+    Log("INFO","***Call started for {} (camera_id={} and debug={})".format(cameraname,camera_id,debug))
     predictions = None
     last_trigger = load_last_trigger()
 
@@ -188,6 +193,7 @@ async def read_item(camera_id, debug: Optional[str] = None):
     i = 0
     found = False
     founditems = []
+    ignore_areas = []
 	
     for prediction in response["predictions"]:
         if found: break
@@ -196,7 +202,7 @@ async def read_item(camera_id, debug: Optional[str] = None):
         label = prediction["label"]
         sizex = int(prediction["x_max"])-int(prediction["x_min"])
         sizey = int(prediction["y_max"])-int(prediction["y_min"])
-        p = [(int(prediction["x_max"])+int(prediction["x_min"])) / 2, (int(prediction["y_max"])+int(prediction["y_min"])) / 2]
+        p = [(int(prediction["x_max"])+int(prediction["x_min"])) / 2, int((int(prediction["y_min"]) + (int(prediction["y_max"]) - int(prediction["y_min"])) * (1 - polygon_deepstack_bottom_offset))) ]
         Log("DEBUG","Suspected '{}' id={} found ({}%) size {}x{} with center @ {} on {}. Checking if '{}' is in ignore zones...".format(label,i,confidence,sizex,sizey, p, cameradata[camera_id]["name"],label))
 
         if not label in [item.get("type") for item in list(cameradata[camera_id]["detect_objects"])]:
@@ -204,47 +210,48 @@ async def read_item(camera_id, debug: Optional[str] = None):
             continue;
 
         for detect_object in cameradata[camera_id]["detect_objects"]:
-            if not found and detect_object["type"] == label:
-                min_sizex = detect_object["min_sizex"]
-                min_sizey = detect_object["min_sizey"]
-                min_confidence = detect_object["min_confidence"]
-                ignore_areas = []
-                if "ignore_areas" in detect_object:
-                    for ignore_area in detect_object["ignore_areas"]:
-                        ignore_areas.append({
-                            "y_min": int(ignore_area["y_min"]),
-                            "x_min": int(ignore_area["x_min"]),
-                            "y_max": int(ignore_area["y_max"]),
-                            "x_max": int(ignore_area["x_max"])
-                        })
-                if not found and \
-                   sizex > min_sizex and \
-                   sizey > min_sizey and \
-                   confidence > min_confidence:
+            if not found and \
+                detect_object["type"] == label:
+                    min_sizex = detect_object["min_sizex"]
+                    min_sizey = detect_object["min_sizey"]
+                    min_confidence = detect_object["min_confidence"]
+                    ignore_areas = []
+                    if "ignore_areas" in detect_object:
+                        for ignore_area in detect_object["ignore_areas"]:
+                            ignore_areas.append({
+                                "y_min": int(ignore_area["y_min"]),
+                                "x_min": int(ignore_area["x_min"]),
+                                "y_max": int(ignore_area["y_max"]),
+                                "x_max": int(ignore_area["x_max"])
+                            })
+                    if not found and \
+                       sizex > min_sizex and \
+                       sizey > min_sizey and \
+                       confidence > min_confidence:
 
-                    Log("DEBUG","Minimum size and confidence haved passed for {} id={}...".format(label,i))
-                    found = CheckZones(prediction, ignore_areas, label, confidence, detect_object["ignore_polygons"], p)
+                        Log("DEBUG","Minimum size and confidence haved passed for {} id={}...".format(label,i))
+                        found = CheckZones(prediction, ignore_areas, label, confidence, detect_object["ignore_polygons"], p)
 
-                    if found:
-                        founditems.append(label)
-                        payload = {}
-                        response = requests.request("GET", triggerurl, data=payload)
-                        end = time.time()
-                        runtime = round(end - start, 1)
-                        Log("INFO","{}% sure we found a {} - triggering {} - took {} seconds".format(confidence,label,cameraname,runtime))
-                        last_trigger[camera_id] = time.time()
-                        save_last_trigger(last_trigger)
-                        Log("DEBUG","Saving last camera time for {} as {}".format(camera_id,last_trigger[camera_id]))
-                        if homebridgeWebhookUrl is not None and homekit_acc_id is not None:
-                            hb = requests.get("{}/?accessoryId={}&state=true".format(homebridgeWebhookUrl,homekitAccId))
-                            Log("DEBUG","Sent message to homebridge webhook: {}".format(hb.status_code))
+                        if found:
+                            founditems.append(label)
+                            payload = {}
+                            response = requests.request("GET", triggerurl, data=payload)
+                            end = time.time()
+                            runtime = round(end - start, 1)
+                            Log("INFO","{}% sure we found a {} - triggering {} - took {} seconds".format(confidence,label,cameraname,runtime))
+                            last_trigger[camera_id] = time.time()
+                            save_last_trigger(last_trigger)
+                            Log("DEBUG","Saving last camera time for {} as {}".format(camera_id,last_trigger[camera_id]))
+                            if homebridgeWebhookUrl is not None and homekit_acc_id is not None:
+                                hb = requests.get("{}/?accessoryId={}&state=true".format(homebridgeWebhookUrl,homekitAccId))
+                                Log("DEBUG","Sent message to homebridge webhook: {}".format(hb.status_code))
+                            else:
+                                Log("DEBUG","Skipping HomeBridge Webhook since no webhookUrl or accessory Id")
                         else:
-                            Log("DEBUG","Skipping HomeBridge Webhook since no webhookUrl or accessory Id")
-                    else:
-                        Log("DEBUG","Ignoring '{}' id={} as it was in an ignore zone.".format(label,i))
+                            Log("DEBUG","Ignoring '{}' id={} as it was in an ignore zone.".format(label,i))
                             
-                else:
-                    Log("DEBUG","Ignoring '{}' id={} as it did not meet minimum size or confidence setting.".format(label,i))
+                    else:
+                        Log("DEBUG","Ignoring '{}' id={} as it did not meet minimum size or confidence setting.".format(label,i))
 
     end = time.time()
     runtime = round(end - start, 1)
@@ -258,23 +265,30 @@ async def read_item(camera_id, debug: Optional[str] = None):
         fn = "{}/{}-{}.jpg".format(capture_dir,"TestOnly",start)
         Log("INFO","Debug Mode On = {} - This trigger was manually invoked".format(debug))
 
-    if found:	
+    founditems = ' '.join(map(str, founditems))
+    ignore_polygons_list = [item.get("ignore_polygons") for item in list(cameradata[camera_id]["detect_objects"])]
+
+    if found:
         try:
-           founditems = ' '.join(map(str, founditems))
            send_email(cameraname, founditems, snapshot_file, fn)
-           ignore_polygons_list = [item.get("ignore_polygons") for item in list(cameradata[camera_id]["detect_objects"])]
-           save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list, fn)
-           print(founditems)
+           save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list, fn, p)
+           Log("INFO","***Call completed for {} (camera_id={} image_name={} and debug={})".format(cameraname,camera_id,fn,debug))
            return ("Triggering camera because {} was found - took {} seconds".format(founditems,runtime))
         except Exception as e:
            Log("ERROR","Error: {}".format(e))
+           Log("INFO","***Call completed for {} (camera_id={} and debug={})".format(cameraname,camera_id,debug))
            return (e)
     else:
+    	#Uncomment below to debug issues when notifications are not being sent
+        #fn = "{}/{}-{}.jpg".format(capture_dir,"NOTHING_{}".format(cameraname),start)
+        #save_image(predictions, cameraname, snapshot_file, ignore_areas, ignore_polygons_list, fn, p)
         Log("INFO","{} not triggered - nothing found - took {} seconds".format(cameraname,runtime))
+        Log("INFO","***Call completed for {} (camera_id={} and debug={})".format(cameraname,camera_id,debug))
         return ("{} not triggered - nothing found".format(cameraname))
+    
 
 
-def save_image(predictions, camera_name, snapshot_file, ignore_areas, ignore_polygons_list, fn):
+def save_image(predictions, camera_name, snapshot_file, ignore_areas, ignore_polygons_list, fn, p):
     try:	
        start = time.time()
        im = Image.open(snapshot_file)
@@ -298,8 +312,13 @@ def save_image(predictions, camera_name, snapshot_file, ignore_areas, ignore_pol
            confidence = round(100 * object["confidence"])
            label = "{} ({}%)".format(object['label'], confidence)
            draw.rectangle((object["x_min"], object["y_min"], object["x_max"], object["y_max"]), outline=(255, 230, 66), width=2)
-           draw.text((object["x_min"]+10, object["y_min"]+10), label, fill=(255, 230, 66, 255))   
-
+           draw.text((object["x_min"]+10, object["y_min"]+10), label, fill=(255, 230, 66, 255))
+       
+       #Draw a circle where detection was found.    
+       X, Y = p
+       r = 9
+       draw.ellipse([(X-r, Y-r), (X+r, Y+r)], fill=(0, 255, 0, 127), outline=(0, 255, 0))
+         
        im.save(fn, quality=100)
        im.close()
        end = time.time()
