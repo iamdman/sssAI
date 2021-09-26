@@ -7,10 +7,11 @@ services:
       args:
         TZ: America/New_York
     image: iamdman/sssai:latest
-    container_name: iamdman-ssaai
+    container_name: iamdman-sssai
     volumes:
-      # mkdir -p ./data/captures
-      - /volume1/docker/sssAI/captureDir:/captureDir
-      - /volume1/docker/sssAI/config:/config
+      - ./captureDir:/captureDir
+      - ./config:/config
+    environment:
+      LOG_LEVEL: DEBUG
     ports:
       - "4242:80"
