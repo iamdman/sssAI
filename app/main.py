@@ -46,7 +46,7 @@ trigger_interval = 60
 if "triggerInterval" in settings:
     trigger_interval = settings["triggerInterval"]
     
-# if set to .5 the center of a detected deepstack object will be used to determine if the object is withing a polygon
+# if set to .5 the center of a detected deepstack object will be used to determine if the object is within a polygon
 # if set to a decimal number between such as .05 then 5% from the bottom of the detected object will be used instead
 polygon_deepstack_bottom_offset = 0.5
 if "polygon_deepstack_bottom_offset" in settings:
