@@ -23,11 +23,16 @@ with open('/config/cameras.json') as f:
 with open('/config/settings.json') as f:
     settings = json.load(f)
 
-sssUrl = settings["sssUrl"]
+SSSUrl = settings["SSSUrl"]
 deepstackUrl = settings["deepstackUrl"]
 homebridgeWebhookUrl = settings["homebridgeWebhookUrl"]
-username = settings["username"]
-password = settings["password"]
+SSSUsername = settings["SSSUsername"]
+SSSPassword = settings["SSSPassword"]
+EmailSenderAddress = settings["EmailSenderAddress"]
+EmailReceiverAddress = settings["EmailReceiverAddress"]
+EmailSmtpHost = settings["EmailSmtpHost"]
+EmailSmtpPort = settings["EmailSmtpPort"]
+EmailPassword = settings["EmailPassword"]
 
 timeout = 10
 if "timeout" in settings:
@@ -41,9 +46,8 @@ trigger_interval = 60
 if "triggerInterval" in settings:
     trigger_interval = settings["triggerInterval"]
     
-# if set to .5 the center of a detected deepstack object will be used to determine if the object is within a polygon
+# if set to .5 the center of a detected deepstack object will be used to determine if the object is withing a polygon
 # if set to a decimal number between such as .05 then 5% from the bottom of the detected object will be used instead
-# a green circle will be applied to the captured image to show what point was used for the IsInsidePolygon function
 polygon_deepstack_bottom_offset = 0.5
 if "polygon_deepstack_bottom_offset" in settings:
     polygon_deepstack_bottom_offset = settings["polygon_deepstack_bottom_offset"]    
@@ -61,7 +65,7 @@ def load_cookies(filename):
         return pickle.load(f)
 
 # Create a session with synology
-url = SSSGetSessionURL.format(sssUrl,username,password)
+url = SSSGetSessionURL.format(SSSUrl,SSSUsername,SSSPassword)
 
 #  Save cookies
 Log("INFO",'Session login: ' + url)
@@ -161,7 +165,7 @@ async def read_item(camera_id, debug: Optional[str] = None):
     else:
         Log("INFO","No last camera time for {}".format(camera_id))
 
-    url = settings["SSSGetSnapshotURL"].format(sssUrl, camera_id)
+    url = settings["SSSGetSnapshotURL"].format(SSSUrl, camera_id)
     triggerurl = cameradata["{}".format(camera_id)]["triggerUrl"]
     if "homekitAccId" in cameradata["{}".format(camera_id)]:
         homekit_acc_id = cameradata["{}".format(camera_id)]["homekitAccId"]
@@ -345,7 +349,7 @@ def send_email(camera_name, founditems, filename, captured_image):
 	</html>
 	""".format(captured_image)
 
-	try:	
-		sendmail("ds220plus72@gmail.com", "dtowns@gmail.com", subject, html, filename)
+	try:		 
+		sendmail(EmailSenderAddress, EmailReceiverAddress, EmailSmtpHost, EmailSmtpPort, EmailPassword, subject, html, filename)
 	except Exception as e:
 		Log("ERROR","Error: {}".format(e))
