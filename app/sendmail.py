@@ -10,12 +10,7 @@ from email.mime.text import MIMEText
 #https://www.google.com/settings/security/lesssecureapps
 #https://accounts.google.com/DisplayUnlockCaptcha
 
-sender_email = "XXXYOURGMAILADDRESSXXX@gmail.com"
-smtp_host = "smtp.gmail.com"
-smtp_port = 587
-password = "XXXYOURGMAILPASSWORDXXX"
-
-def sendmail(sender_email, receiver_email, subject, html, filename) -> bool:
+def sendmail(sender_email, receiver_email, smtp_host, smtp_port, password, subject, html, filename) -> bool:
    # Create a multipart message and set headers
    message = MIMEMultipart()
    message["From"] = sender_email
