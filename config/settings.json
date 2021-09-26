@@ -4,7 +4,7 @@
 	"SSSPassword": "XXXPASSWRODFORCREATEDNASSURVEILLANCESTATIONUSERXXX",
 	"SSSGetSessionURL" : "{}/webapi/auth.cgi?api=SYNO.API.Auth&method=login&version=3&account={}&passwd={}&session=SurveillanceStation",
 	"SSSGetSnapshotURL" : "{}/webapi/entry.cgi?camStm=1&version=2&cameraId={}&api=%22SYNO.SurveillanceStation.Camera%22&method=GetSnapshot",
-	"deepstackUrl": "http://192.168.1.146:83", 
+	"deepstackUrl": "http://XXXYOURDEEPSTACKIPXXX:83", 
 	"triggerInterval": 15,
 	"timeout": 180,
 	"captureDir": "/captureDir",
