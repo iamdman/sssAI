@@ -10,8 +10,8 @@
 	"captureDir": "/captureDir",
 	"polygon_deepstack_bottom_offset": 0.1,
 	"homebridgeWebhookUrl": null,
-	"EmailSenderAddress": ""XXXCREATEAGMAILADDRESSFORCAMERAXXX@gmail.com"",
-	"EmailReceiverAddress": ""XXXYOURGMAILADDRESSXXX@gmail.com"",
+	"EmailSenderAddress": "XXXCREATEAGMAILADDRESSFORCAMERAXXX@gmail.com",
+	"EmailReceiverAddress": "XXXYOURGMAILADDRESSXXX@gmail.com",
 	"EmailSmtpHost": "smtp.gmail.com",
 	"EmailSmtpPort": 587,
 	"EmailPassword": "XXXPASSWORDFORCREATEDGMAILADDRESSFORCAMERAXXX"
