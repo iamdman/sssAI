@@ -1,12 +1,18 @@
 {
-	"sssUrl": "http://192.168.178.10:5000",
-	"deepstackUrl": "http://192.168.178.10:83",
-	"username": "username",
-	"password": "passowrd",
+	"SSSUrl":"http://XXXYOURNASIPXXX:5000", 
+	"SSSUsername": "XXXCREATEANASSURVEILLANCESTATIONUSERXXX", 
+	"SSSPassword": "XXXPASSWRODFORCREATEDNASSURVEILLANCESTATIONUSERXXX",
+	"SSSGetSessionURL" : "{}/webapi/auth.cgi?api=SYNO.API.Auth&method=login&version=3&account={}&passwd={}&session=SurveillanceStation",
+	"SSSGetSnapshotURL" : "{}/webapi/entry.cgi?camStm=1&version=2&cameraId={}&api=%22SYNO.SurveillanceStation.Camera%22&method=GetSnapshot",
+	"deepstackUrl": "http://XXXYOURDEEPSTACKIPXXX:83", 
 	"triggerInterval": 15,
 	"timeout": 180,
 	"captureDir": "/captureDir",
-	"SSSGetSessionURL" : "{}/webapi/auth.cgi?api=SYNO.API.Auth&method=login&version=3&account={}&passwd={}&session=SurveillanceStation",
-	"SSSGetSnapshotURL" : "{}/webapi/entry.cgi?camStm=1&version=2&cameraId={}&api=%22SYNO.SurveillanceStation.Camera%22&method=GetSnapshot",
-	"homebridgeWebhookUrl": null
+	"polygon_deepstack_bottom_offset": 0.1,
+	"homebridgeWebhookUrl": null,
+	"EmailSenderAddress": ""XXXCREATEAGMAILADDRESSFORCAMERAXXX@gmail.com"",
+	"EmailReceiverAddress": ""XXXYOURGMAILADDRESSXXX@gmail.com"",
+	"EmailSmtpHost": "smtp.gmail.com",
+	"EmailSmtpPort": 587,
+	"EmailPassword": "XXXPASSWORDFORCREATEDGMAILADDRESSFORCAMERAXXX"
 }
