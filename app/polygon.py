@@ -1,8 +1,6 @@
 # Check if a given point 
 # lies inside a given polygon
-# Refer https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-# for explanation of functions onSegment(),
-# orientation() and doIntersect() 
+# Refer https://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/?ref=lbp
 # This code is contributed by Vikas Chitturi
 
 import logging
@@ -112,6 +110,12 @@ def IsInsidePolygon(points:list, p:tuple, label) -> bool:
                 return onSegment(points[i], p,
                                  points[next])
                                   
+            #bug fix for point matching a point on a vertices            
+            if orientation(p, extreme, 
+                points[i]) == 0 and \
+                onSegment(p, points[i], extreme):
+                return True # // a vertex is on the segment of (p, extreme)
+                                    
             count += 1
              
         i = next
@@ -123,7 +127,6 @@ def IsInsidePolygon(points:list, p:tuple, label) -> bool:
     return (count % 2 == 1)
 
 def Log(level, entry):
-    print(entry)
     if level == "DEBUG":
         logging.debug(entry)
     elif level == "ERROR":
