@@ -16,9 +16,9 @@
                 },
                 {
                 "type": "person",
-                "min_sizex": 80, 
-                "min_sizey": 80,
-                "min_confidence": 60,                   
+                "min_sizex": 40, 
+                "min_sizey": 60,
+                "min_confidence": 40,                   
                 "comment": "ignore people on sidewalk AND at neighbors",
                 "ignore_polygons" : [[[271,786],[1766,199],[1730,185],[814,428],[221,663]] , [[1329,284],[1530,230],[1341,110],[1226,203]] , [[1456,326],[1885,480],[1904,316],[1675,234]]]
                  }
@@ -37,13 +37,13 @@
                 "min_sizey": 80,
                 "min_confidence": 55,
                 "comment": "ignore cars in our driveway AND neighbors AND road",
-                "ignore_polygons" : [[[692,293],[1196,311],[1470,995],[373,961]] , [[1322,319],[1914,375],[1914,1012],[1669,998]] , [[83,177],[602,6],[814,5],[794,70],[1917,297],[1917,410],[1217,298],[105,305]]]
+                "ignore_polygons" : [[[692,293],[1196,311],[1496,1077],[317,1077]] , [[1322,319],[1914,375],[1914,1012],[1669,998]] , [[83,177],[602,6],[814,5],[1917,208],[1917,297],[1917,410],[1217,298],[105,305]]]
                  },
                  {
                 "type": "person",
-                "min_sizex": 80, 
-                "min_sizey": 80,
-                "min_confidence": 60,                   
+                "min_sizex": 40, 
+                "min_sizey": 60,
+                "min_confidence": 40,                   
                 "comment": "ignore people on sidewalk AND at neighbors",
                 "ignore_polygons" : [[[68,425],[1918,520],[1918,621],[896,577],[23,521]] , [[1322,319],[1914,375],[1914,1012],[1669,998]]]
                  }
