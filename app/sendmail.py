@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 #https://www.google.com/settings/security/lesssecureapps
 #https://accounts.google.com/DisplayUnlockCaptcha
 
-#Will externalize varibles below soon
 sender_email = "XXXYOURGMAILADDRESSXXX@gmail.com"
 smtp_host = "smtp.gmail.com"
 smtp_port = 587
